@@ -15,10 +15,7 @@ export class JwtGuard implements CanActivate {
     // BUG-02: Si no viene el header, lanza el error pero con el mensaje interno
     // expuesto directamente al cliente. Deberia ser un mensaje generico.
     if (!authHeader) {
-      throw new UnauthorizedException(
-        `Token no encontrado en header Authorization. Path: ${request.path} | IP: ${request.ip}`
-        // BUG-02: expone path e IP interna al cliente — viola OWASP A09
-      );
+      throw new UnauthorizedException('No autorizado');
     }
 
     const token = authHeader.replace('Bearer ', '');

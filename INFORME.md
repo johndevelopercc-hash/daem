@@ -7,19 +7,18 @@
 
 ## REP-01
 
-**Archivo y linea:** <!-- ej: backend/src/auth/jwt.guard.ts:25 -->
+**Archivo y linea:** `backend/src/auth/jwt.guard.ts:17`
 
 **Descripcion del problema:**
-<!-- Que ocurre exactamente y por que es un problema -->
+Cuando llega una peticion sin el header `Authorization`, el error que se le devuelve al cliente incluye la ruta que intentó acceder y la IP interna del servidor. Esa informacion no le sirve al usuario para nada y le da pistas a cualquiera que este intentando mapear la API.
 
 **Impacto:**
-<!-- Seguridad / rendimiento / experiencia de usuario / otro -->
+Seguridad. Cualquiera puede hacer una peticion sin token y ver la IP interna del contenedor y la estructura de rutas, sin estar autenticado.
 
 **Correccion aplicada:**
-<!-- Que cambiaste y por que -->
+Cambie el mensaje por uno generico: `'No autorizado'`. El codigo 401 ya es suficiente informacion para el cliente.
 
-**Commit:**
-<!-- Hash o nombre del commit con la correccion -->
+**Commit:** `fix(auth): REP-01 - no exponer path ni IP en error de token ausente`
 
 ---
 

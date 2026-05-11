@@ -60,15 +60,18 @@ Se intercambiaron los valores de retorno: `diff > 30` devuelve `'stale'`, `diff 
 
 ## REP-04
 
-**Archivo y linea:**
+**Archivo y linea:** `frontend/src/components/EmpresaSelector.tsx:36`
 
 **Descripcion del problema:**
+El componente tenia un estado `error` que se rellenaba correctamente en el `catch`, pero nunca se usaba en el render. Cuando la llamada a la API fallaba, `loading` pasaba a `false` y se intentaba renderizar la lista de empresas vacia, dejando la pantalla en blanco sin ningun mensaje.
 
 **Impacto:**
+UX. El usuario no sabe si hay un error, si no hay empresas o si la pagina cargo mal. No puede hacer nada para resolverlo.
 
 **Correccion aplicada:**
+Se añadio un bloque `if (error)` despues del check de `loading` que muestra el mensaje de error al usuario antes de intentar renderizar la lista.
 
-**Commit:**
+**Commit:** `fix(frontend): REP-04 - mostrar mensaje de error al fallar la carga de empresas`
 
 ---
 

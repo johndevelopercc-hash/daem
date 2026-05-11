@@ -32,7 +32,6 @@ interface EmpresaSelectorProps {
 export function EmpresaSelector({ onSelect }: EmpresaSelectorProps) {
   const [empresas, setEmpresas] = useState<Empresa[]>([]);
   const [loading, setLoading] = useState(true);
-  // BUG-11: El estado de error existe pero nunca se usa para mostrar nada al usuario
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -54,9 +53,13 @@ export function EmpresaSelector({ onSelect }: EmpresaSelectorProps) {
     );
   }
 
-  // BUG-11: El error se guarda en estado pero nunca se renderiza.
-  // El usuario ve la pantalla vacia sin saber que ocurrio un error.
-  // Deberia mostrar un mensaje de error si error !== null.
+  if (error) {
+    return (
+      <p className="rounded bg-red-50 px-4 py-3 text-sm text-red-700">
+        Error al cargar las empresas: {error}
+      </p>
+    );
+  }
 
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">

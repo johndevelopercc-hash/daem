@@ -169,6 +169,23 @@ Ruido en el arbol de directorios y posible confusion para herramientas que recor
 **Correccion:**
 Se elimino el directorio con `rm -rf '{backend'` desde la raiz del proyecto.
 
+### Hallazgo 3 — SQL Injection en `getResumen`
+
+**Archivo y linea:** `backend/src/empresas/empresas.service.ts:37`
+
+**Descripcion:**
+La query de resumen financiero interpolaba directamente las variables `empresaId`, `ejercicio` y `mes` en el string SQL. Cualquiera que controlara esos parametros podia inyectar SQL arbitrario y acceder o modificar datos de otras empresas.
+
+**Impacto:**
+Critico de seguridad. SQL Injection es una vulnerabilidad del top 1 de OWASP. El endpoint estaba protegido por JWT pero un usuario autenticado podria haber explotado esto para leer datos de otras empresas o corromper la base de datos.
+
+**Correccion:**
+Se reemplazaron las interpolaciones por parametros `$1`, `$2`, `$3` pasados como segundo argumento a `pool.query()`. La libreria `pg` los escapa correctamente.
+
+Con mas tiempo migraria el acceso a datos a un ORM como TypeORM o Prisma, que eliminan esta clase de vulnerabilidades por diseño ya que nunca construyen queries por concatenacion. Tambien facilitaria el mantenimiento y la migracion de esquema.
+
+**Commit:** `fix(backend): SQL injection en getResumen - usar parametros en lugar de interpolacion`
+
 ---
 
 ## Reflexion final

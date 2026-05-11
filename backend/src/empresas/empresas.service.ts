@@ -32,21 +32,15 @@ export class EmpresasService {
       throw new NotFoundException(`Empresa ${empresaId} no encontrada`);
     }
 
-    // BUG-05: La query usa interpolacion directa de variables en el SQL
-    // Esto es vulnerable a SQL Injection. Debe usar parametros ($1, $2, $3)
-    const query = `
-      SELECT
-        tipo,
-        SUM(importe) as total
-      FROM apuntes
-      WHERE empresa_id = '${empresaId}'
-        AND ejercicio = ${ejercicio}
-        AND mes = ${mes}
-      GROUP BY tipo
-    `;
-    // BUG-05: usar parametros: WHERE empresa_id = $1 AND ejercicio = $2 AND mes = $3
-
-    const result = await this.pool.query(query);
+    const result = await this.pool.query(
+      `SELECT tipo, SUM(importe) as total
+       FROM apuntes
+       WHERE empresa_id = $1
+         AND ejercicio = $2
+         AND mes = $3
+       GROUP BY tipo`,
+      [empresaId, ejercicio, mes],
+    );
 
     let total_ingresos = 0;
     let total_gastos = 0;

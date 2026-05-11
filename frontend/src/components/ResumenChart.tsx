@@ -4,7 +4,6 @@
 // ESTADO: a medias — NO conectado a ninguna pantalla todavia
 // Ver ticket DAEM-201: "Anadir grafico al modulo de resumen"
 // ============================================================
-import { useState } from 'react';
 
 // TODO: reemplazar este tipo por el de types/index.ts cuando se conecte
 interface DatoGrafico {
@@ -27,8 +26,6 @@ const DATOS_EJEMPLO: DatoGrafico[] = [
 ];
 
 export function ResumenChart({ datos = DATOS_EJEMPLO }: ResumenChartProps) {
-  const [mesSeleccionado, setMesSeleccionado] = useState<number | null>(null);
-
   const maxValor = Math.max(
     ...datos.flatMap(d => [d.ingresos, d.gastos]),
   );
@@ -42,8 +39,7 @@ export function ResumenChart({ datos = DATOS_EJEMPLO }: ResumenChartProps) {
         {datos.map(d => (
           <div
             key={d.mes}
-            className="flex flex-1 flex-col items-center gap-1 cursor-pointer"
-            onClick={() => setMesSeleccionado(d.mes === mesSeleccionado ? null : d.mes)}
+            className="flex flex-1 flex-col items-center gap-1"
           >
             <div className="flex w-full gap-0.5" style={{ height: 100 }}>
               <div

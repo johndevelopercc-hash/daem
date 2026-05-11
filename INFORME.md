@@ -113,15 +113,18 @@ Se elimino el campo `detail` del response. El error completo (con stack) se logu
 
 ## REP-07
 
-**Archivo y linea:**
+**Archivo y linea:** `backend/src/auth/auth.service.ts:22`
 
 **Descripcion del problema:**
+Al generar el JWT, el payload incluia el campo `password` con la contraseña en texto plano. El payload de un JWT solo está codificado en base64, no cifrado, por lo que cualquiera que intercepte o decodifique el token puede leer la contraseña directamente.
 
 **Impacto:**
+Critico de seguridad. La contraseña queda expuesta en el token, en los logs de cualquier sistema que lo registre, y en el navegador del cliente (localStorage). Compromete la cuenta del usuario aunque el token expire.
 
 **Correccion aplicada:**
+Se elimino `password` del payload. El token ahora solo contiene `sub`, `email` y `rol`, que es la informacion minima necesaria para identificar y autorizar al usuario. Se añadio ademas la interfaz `JwtPayload` para tipar el payload correctamente y evitar que se cuele un campo sensible en el futuro sin que TypeScript lo detecte.
 
-**Commit:**
+**Commit:** `fix(auth): REP-07 - eliminar password del payload del JWT`
 
 ---
 

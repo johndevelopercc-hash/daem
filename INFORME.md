@@ -24,15 +24,20 @@ Cambie el mensaje por uno generico: `'No autorizado'`. El codigo 401 ya es sufic
 
 ## REP-02
 
-**Archivo y linea:**
+**Archivo y linea:** `backend/src/auth/jwt.guard.ts:26`
 
 **Descripcion del problema:**
+El bloque `catch` del guard atrapaba cualquier error de verificacion del token (expirado, firma invalida, malformado) y en lugar de rechazar la peticion devolvía `return true`, dejando pasar al usuario como si el token fuera valido. Ademas, asignaba el payload al request con `as any`, violando el estandar de tipos del equipo.
 
 **Impacto:**
+Critico de seguridad. Cualquier token, aunque estuviera expirado o tuviera la firma incorrecta, daba acceso a todos los endpoints protegidos.
 
 **Correccion aplicada:**
+- El `catch` ahora lanza `UnauthorizedException('Token invalido')` en lugar de devolver `true`.
+- Defini las interfaces `JwtPayload` y `AuthenticatedRequest` para tipar correctamente el payload y el request sin usar `as any`.
+- El guard usa `verifyAsync<JwtPayload>` para que el tipo fluya correctamente.
 
-**Commit:**
+**Commit:** `fix(auth): REP-02 - rechazar tokens invalidos en JwtGuard y eliminar as any`
 
 ---
 

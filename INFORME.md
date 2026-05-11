@@ -208,6 +208,23 @@ Con mas tiempo definiria DTOs tanto en el backend como en el frontend que actuen
 
 ---
 
+### Hallazgo 5 — `nombreMes` devuelve el mes equivocado
+
+**Archivo y linea:** `frontend/src/lib/formatters.ts:35`
+
+**Descripcion:**
+El array `MESES` esta indexado desde 0 pero la funcion recibe el mes como numero 1-12. `MESES[mes]` con `mes=1` devuelve `'Febrero'` en lugar de `'Enero'`. Todos los meses estaban desplazados uno hacia adelante y `mes=12` devolvía `'Mes desconocido'`.
+
+**Impacto:**
+UX. El selector de mes en la vista de resumen mostraba el nombre incorrecto para cada mes.
+
+**Correccion:**
+Cambiado `MESES[mes]` por `MESES[mes - 1]`.
+
+**Commit:** `fix(frontend): nombreMes devuelve el mes correcto con indice mes - 1`
+
+---
+
 ## Reflexion final
 
 **Que cambiarias si tuvieras mas tiempo:**

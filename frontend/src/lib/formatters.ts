@@ -24,15 +24,12 @@ export function formatFecha(isoString: string): string {
 }
 
 // Devuelve el nombre del mes en espanol
-// BUG-BASURA: el array esta indexado desde 0 pero la funcion recibe mes 1-12
-// Si mes=1 (enero), devuelve "febrero". Offset de 1 en todos los meses.
-// No es un bug reportado — es ruido. El candidato puede o no detectarlo.
 const MESES = [
   'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
   'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
 ];
 export function nombreMes(mes: number): string {
-  return MESES[mes] ?? 'Mes desconocido'; // BUG-BASURA: deberia ser MESES[mes - 1]
+  return MESES[mes - 1] ?? 'Mes desconocido';
 }
 
 // Trunca un texto a un maximo de caracteres

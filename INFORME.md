@@ -96,15 +96,18 @@ Con mas tiempo añadiria paginacion con `LIMIT` y `OFFSET` para que el endpoint 
 
 ## REP-06
 
-**Archivo y linea:**
+**Archivo y linea:** `backend/src/empresas/empresas.controller.ts:35`
 
 **Descripcion del problema:**
+Cuando fallaba el endpoint `GET /empresas`, el catch construia la respuesta de error incluyendo `error.stack` en el campo `detail`. El stack trace contiene rutas absolutas del servidor, versiones de librerias y la estructura interna del codigo.
 
 **Impacto:**
+Seguridad. Cualquier error en produccion filtraba informacion tecnica interna directamente al cliente en el cuerpo del 500.
 
 **Correccion aplicada:**
+Se elimino el campo `detail` del response. El error completo (con stack) se loguea internamente con el `Logger` de NestJS para que quede en los logs del servidor. Al cliente solo le llega `'Error interno'`.
 
-**Commit:**
+**Commit:** `fix(backend): REP-06 - no exponer stack trace en respuesta de error`
 
 ---
 

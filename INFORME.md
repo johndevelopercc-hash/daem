@@ -188,6 +188,26 @@ Con mas tiempo migraria el acceso a datos a un ORM como TypeORM o Prisma, que el
 
 ---
 
+### Hallazgo 4 — `fetchEmpresas` silencia errores HTTP y `login` usa `: any`
+
+**Archivo y linea:** `frontend/src/services/api.ts:33` y `api.ts:21`
+
+**Descripcion:**
+Dos problemas en el mismo archivo. Primero, `fetchEmpresas` devolvía `[]` cuando el servidor respondía con 401 o 500 en lugar de lanzar un error, lo que hacía que el `catch` del componente nunca se ejecutara y el usuario viera la pantalla vacía sin mensaje (relacionado con REP-04). Segundo, la funcion `login` tipaba el response con `: any` violando el estandar del equipo.
+
+**Impacto:**
+UX y calidad de codigo. El error del servidor quedaba completamente oculto para el usuario y para el desarrollador.
+
+**Correccion:**
+- `fetchEmpresas`: cambiado `return []` por `throw new Error(...)` con el status HTTP.
+- `login`: reemplazado `: any` por el tipo especifico `{ access_token: string }`.
+
+Con mas tiempo definiria DTOs tanto en el backend como en el frontend que actuen como contrato entre las dos capas. En el backend los DTOs de respuesta garantizarian que nunca se filtre un campo inesperado (como paso con `password`). En el frontend, en lugar de tipar inline con `{ access_token: string }` habria un modelo compartido que ambas partes respetan, de modo que si el contrato cambia TypeScript lo detecta en compilacion en lugar de en runtime.
+
+**Commit:** `fix(frontend): fetchEmpresas lanza error en lugar de retornar array vacio y eliminar any en login`
+
+---
+
 ## Reflexion final
 
 **Que cambiarias si tuvieras mas tiempo:**

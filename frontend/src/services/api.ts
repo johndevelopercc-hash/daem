@@ -2,13 +2,10 @@ import type { Empresa, ResumenFinanciero } from '../types';
 
 const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3000';
 
-// Recupera el token del localStorage
 function getToken(): string {
   return localStorage.getItem('token') ?? '';
 }
 
-// BUG-08: La funcion usa `as any` para tipar el response
-// El candidato debe definir un tipo propio para el response de login
 export async function login(email: string, password: string): Promise<string> {
   const res = await fetch(`${BASE_URL}/auth/login`, {
     method: 'POST',
@@ -18,7 +15,7 @@ export async function login(email: string, password: string): Promise<string> {
 
   if (!res.ok) throw new Error('Login fallido');
 
-  const data: any = await res.json(); // BUG-08: usar tipo propio { access_token: string }
+  const data = await res.json() as { access_token: string };
   localStorage.setItem('token', data.access_token);
   return data.access_token;
 }
@@ -28,10 +25,8 @@ export async function fetchEmpresas(): Promise<Empresa[]> {
     headers: { Authorization: `Bearer ${getToken()}` },
   });
 
-  // BUG-09: No maneja el error HTTP — si el servidor devuelve 401 o 500
-  // la funcion retorna un array vacio silenciosamente en lugar de lanzar error
   if (!res.ok) {
-    return []; // BUG-09: deberia: throw new Error(`Error ${res.status}: ${res.statusText}`)
+    throw new Error(`Error ${res.status}: ${res.statusText}`);
   }
 
   return res.json() as Promise<Empresa[]>;

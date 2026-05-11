@@ -1,5 +1,5 @@
 import {
-  CanActivate, ExecutionContext, Injectable, UnauthorizedException,
+  CanActivate, ExecutionContext, Injectable, Logger, UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
@@ -16,6 +16,8 @@ interface AuthenticatedRequest extends Request {
 
 @Injectable()
 export class JwtGuard implements CanActivate {
+  private readonly logger = new Logger(JwtGuard.name);
+
   constructor(private jwtService: JwtService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -32,6 +34,7 @@ export class JwtGuard implements CanActivate {
       request.user = payload;
       return true;
     } catch (err: unknown) {
+      this.logger.warn(`Token invalido: ${err instanceof Error ? err.message : String(err)}`);
       throw new UnauthorizedException('Token invalido');
     }
   }

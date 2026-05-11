@@ -8,9 +8,9 @@ import { fetchEmpresas } from '../services/api';
 // Actualmente ok es > 30 min (invertido).
 function getFreshness(ultima_sync: string): FreshnessStatus {
   const diff = (Date.now() - new Date(ultima_sync).getTime()) / 1000 / 60;
-  if (diff > 30) return 'ok';       // BUG-10: deberia ser 'stale'
+  if (diff > 30) return 'stale';
   if (diff > 5) return 'warning';
-  return 'stale';                   // BUG-10: deberia ser 'ok'
+  return 'ok';
 }
 
 const freshnessColor: Record<FreshnessStatus, string> = {

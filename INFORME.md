@@ -43,15 +43,18 @@ Critico de seguridad. Cualquier token, aunque estuviera expirado o tuviera la fi
 
 ## REP-03
 
-**Archivo y linea:**
+**Archivo y linea:** `frontend/src/components/EmpresaSelector.tsx:11`
 
 **Descripcion del problema:**
+La funcion `getFreshness` tenia invertidos los valores de retorno. Cuando la diferencia de tiempo era mayor a 30 minutos (dato viejo) devolvía `'ok'`, y cuando era menor a 5 minutos (dato reciente) devolvía `'stale'`. El resultado es que las empresas con datos viejos aparecían en verde y las recientes en rojo.
 
 **Impacto:**
+UX y fiabilidad. El usuario tomaba decisiones basadas en un indicador que mostraba exactamente lo contrario de la realidad.
 
 **Correccion aplicada:**
+Se intercambiaron los valores de retorno: `diff > 30` devuelve `'stale'`, `diff > 5` devuelve `'warning'` y el resto devuelve `'ok'`.
 
-**Commit:**
+**Commit:** `fix(frontend): REP-03 - corregir logica de frescura invertida`
 
 ---
 

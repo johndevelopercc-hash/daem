@@ -77,15 +77,20 @@ Se añadio un bloque `if (error)` despues del check de `loading` que muestra el 
 
 ## REP-05
 
-**Archivo y linea:**
+**Archivo y linea:** `backend/src/empresas/empresas.service.ts:12`
 
 **Descripcion del problema:**
+La query traía todas las filas de la tabla `empresas` sin ningún filtro y luego aplicaba `.filter(e => e.activa === true)` en memoria en Node. Con pocos registros no se nota, pero con miles de empresas esto carga toda la tabla en memoria para descartar la mayoría.
 
 **Impacto:**
+Rendimiento. El tiempo de respuesta y el uso de memoria escalan con el total de registros de la tabla en lugar de con los registros activos, que son los que realmente se devuelven.
 
 **Correccion aplicada:**
+Se añadio `WHERE activa = true` directamente en la query SQL y se elimino el `.filter()` en memoria. La base de datos filtra con el indice, no Node.
 
-**Commit:**
+Con mas tiempo añadiria paginacion con `LIMIT` y `OFFSET` para que el endpoint no devuelva todos los registros de golpe independientemente de cuantos haya, lo que complementaria esta correccion y haria el endpoint escalable de verdad.
+
+**Commit:** `fix(backend): REP-05 - mover filtro de empresas activas a la query SQL`
 
 ---
 

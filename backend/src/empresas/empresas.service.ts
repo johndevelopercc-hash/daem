@@ -7,18 +7,14 @@ import { Empresa, ResumenFinanciero } from './empresas.types';
 export class EmpresasService {
   constructor(@Inject(PG_POOL) private pool: Pool) {}
 
-  // BUG-04: Filtra empresas activas EN MEMORIA despues de traer TODAS las filas
-  // Con 10.000 empresas esto carga toda la tabla. Debe filtrarse en la query SQL.
   async findAll(): Promise<Empresa[]> {
     const result = await this.pool.query<Empresa>(
       `SELECT id, nombre, nif, programa, activa, ultima_sync
        FROM empresas
-       ORDER BY nombre`
-      // BUG-04: falta WHERE activa = true en la query
+       WHERE activa = true
+       ORDER BY nombre`,
     );
-
-    // El filtro se hace en memoria — ineficiente y no escala
-    return result.rows.filter(e => e.activa === true);
+    return result.rows;
   }
 
   async getResumen(

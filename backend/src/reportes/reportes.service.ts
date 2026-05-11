@@ -44,11 +44,7 @@ export class ReportesService {
     return repercutido - soportado;
   }
 
-  // Formatea importe para mostrar en pantalla
-  // BUG-BASURA: usa toFixed(2) pero no convierte a number primero
-  // Si importe llega como string desde la DB, el resultado es incorrecto
-  // No es un bug reportado — es ruido para el candidato
   formatearImporte(importe: number | string): string {
-    return `€${(importe as number).toFixed(2)}`;
+    return `€${Number(importe).toFixed(2)}`;
   }
 }

@@ -225,6 +225,23 @@ Cambiado `MESES[mes]` por `MESES[mes - 1]`.
 
 ---
 
+### Hallazgo 6 — `formatearImporte` falla en runtime si el importe llega como string
+
+**Archivo y linea:** `backend/src/reportes/reportes.service.ts:52`
+
+**Descripcion:**
+La funcion acepta `number | string` pero usaba `(importe as number).toFixed(2)`. Un cast de TypeScript no convierte el valor en runtime, solo le dice al compilador que confíe. Si `importe` llega como string desde la base de datos (lo que pasa con `pg` en columnas `NUMERIC`), `toFixed` falla porque los strings no tienen ese metodo.
+
+**Impacto:**
+Error en runtime. El servicio aun no esta conectado al sistema principal, pero el bug habria aparecido en cuanto se integrara.
+
+**Correccion:**
+Reemplazado `(importe as number).toFixed(2)` por `Number(importe).toFixed(2)`, que convierte correctamente tanto si llega number como string.
+
+**Commit:** `fix(backend): formatearImporte convierte a number antes de llamar toFixed`
+
+---
+
 ## Reflexion final
 
 **Que cambiarias si tuvieras mas tiempo:**

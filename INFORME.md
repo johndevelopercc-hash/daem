@@ -5,6 +5,16 @@
 
 ---
 
+## Nota sobre uso de herramientas
+
+Use IA (Claude) como herramienta de apoyo durante la prueba, principalmente para ayudar a redactar el informe y acelerar la escritura. El razonamiento detras de cada correccion es mio: lei cada bug, entendi el problema, verifique la solucion y la traslade desde conocimiento que ya tenia en otras tecnologias y contextos.
+
+Al ser un codebase pequeño con pocos archivos, cada cambio es verificable linea por linea. No entregue nada que no pueda explicar. Estoy de acuerdo con una entrevista tecnica y con gusto defiendo cualquiera de las decisiones: por que `return true` en el catch del guard era el bug critico, por que `verifyAsync<JwtPayload>` y no solo `verifyAsync`, por que el filtro en memoria no escala, o cualquier otro punto del informe.
+
+La IA ayuda a escribir mas rapido. El que piensa sigue siendo el developer.
+
+---
+
 ## REP-01
 
 **Archivo y linea:** `backend/src/auth/jwt.guard.ts:17`
@@ -242,10 +252,45 @@ Reemplazado `(importe as number).toFixed(2)` por `Number(importe).toFixed(2)`, q
 
 ---
 
+### Hallazgo 7 — Estado muerto en `ResumenChart`
+
+**Archivo y linea:** `frontend/src/components/ResumenChart.tsx:29`
+
+**Descripcion:**
+El componente tenia un `useState<number | null>(null)` llamado `mesSeleccionado` que se actualizaba con un `onClick` en cada barra del grafico — al hacer click en un mes, alternaba entre guardar ese numero y volver a `null`. El problema es que `mesSeleccionado` nunca se leia en el render: no habia clase condicional, no habia tooltip, no habia panel de detalle que dependiera de ese valor. Cada click disparaba un re-render sin ningun efecto visible para el usuario.
+
+**Impacto:**
+Re-renders innecesarios en cada click y un `import { useState }` sin uso. El componente ya tenia el comentario de que no esta conectado a ninguna pantalla, asi que el estado era codigo a medias que nunca llego a usarse.
+
+**Correccion:**
+Se elimino el estado `mesSeleccionado`, el `setMesSeleccionado`, el `onClick` de cada barra y el `import { useState }`. Si en el futuro se implementa la seleccion de mes, habria que añadirlo junto con el JSX que lo consume — no tiene sentido tener el estado sin la UI que lo muestra.
+
+**Commit:** `fix(frontend): eliminar estado muerto en ResumenChart`
+
+---
+
 ## Reflexion final
 
 **Que cambiarias si tuvieras mas tiempo:**
 
-**Que regla del estandar de codigo fue mas dificil de cumplir y por que:**
+Lo mas urgente es el login. Las credenciales estan hardcodeadas en `auth.service.ts` y la tabla `usuarios` del seed no se toca en ningun momento. Antes de cualquier otra cosa, eso hay que conectarlo: buscar por email, comparar con `bcrypt.compare`, y devolver el mismo mensaje tanto si el email no existe como si la password es incorrecta, para no filtrar que cuentas existen.
 
-**Alguna decision tecnica que tomaste y quieras explicar:**
+Lo segundo que cambiaria es mover el acceso a datos a TypeORM o Prisma. El SQL injection en `getResumen` no habria existido con un ORM. Tambien soluciona el problema de los NUMERIC que `pg` devuelve como strings — TypeORM los mapea automaticamente, sin el cast manual que tuve que parchear en `formatearImporte`. Las queries a mano funcionan en proyectos chicos pero se vuelven un problema a medida que crece el esquema.
+
+El `JWT_SECRET` tiene el fallback `'supersecret_dev_only'` en `app.module.ts` y en `config.ts`. Si alguien despliega sin configurar esa variable, cualquiera que conozca ese string firma tokens validos. Añadiria validacion de variables de entorno en el arranque para que el servidor no inicie si falta algo critico.
+
+En el frontend, el problema que mas se nota al escalar es que el fetch esta mezclado directamente en los componentes. Cada componente maneja su propio loading, error y datos. Lo moveria a hooks propios (`useEmpresas`, `useResumen`) y probablemente a React Query, que te da cache y refetch sin tener que escribir todo ese codigo de estado a mano. El indicador de frescura tambien tendria mas sentido si los datos se refrescaran solos en background.
+
+Tests no hay ninguno. REP-02 — el catch que devolvía `return true` — se habria detectado en el primer test unitario del guard. Eso es lo que mas duele porque es el bug mas critico y el mas facil de cubrir.
+
+---
+
+**Que regla del estandar fue mas dificil de cumplir:**
+
+La de cero `: any`. `res.json()` devuelve `Promise<any>` y TypeScript no se queja si lo asignas directamente a una variable tipada, el error es silencioso. Hay que acordarse de tipar en el punto de consumo porque el compilador no lo detecta automaticamente.
+
+---
+
+**Alguna decision tecnica que quieras explicar:**
+
+Defini `JwtPayload` y `AuthenticatedRequest` en el mismo `jwt.guard.ts` en lugar de crear un archivo de tipos compartido. Lo hice para mantener el cambio localizado — no queria añadir estructura que no existia en el proyecto. En un proyecto real lo moveria a `shared/types/` para que el guard y el servicio de auth importen desde el mismo sitio, pero aqui me parecio un overhead innecesario para el scope de la prueba.
